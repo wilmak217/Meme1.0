@@ -8,14 +8,21 @@
 
 import UIKit
 
-class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
+class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UIAlertViewDelegate {
     
     @IBOutlet weak var imagePickerView: UIImageView!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     @IBOutlet weak var topTextField: UITextField!
     @IBOutlet weak var bottomTextField: UITextField!
+    @IBOutlet weak var photoToolbar: UIToolbar!
+    @IBOutlet weak var saveButton: UIBarButtonItem!
+    @IBOutlet weak var navigationBar: UINavigationItem!
     
-    /*var  = [CreatedMemes]!*/
+    // object variable declaration to initiate save capability
+    var enableSave = false
+    
+    var memeToSave : GenMeme! // Meme struct object variable declaration
+    var memedImage :  UIImage! // Meme image object variable declaration
     
     // Variable assignment of UITextField Font type and style parameters to be used by initializeMemeEditableParameters method
     let memeTextAttributes = [
@@ -30,7 +37,6 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
       
         super.viewDidLoad()
         
-
         initializeMemeEditableParameters()
         
         //(DO NOT ERASE!!!!!!!) Will require later when saving memes after text editing
@@ -41,24 +47,13 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     }
     
     override func viewWillAppear(animated: Bool) {
-        
         super.viewWillAppear(animated)
-        if let cameraAvaialble = UIImagePickerController.isCameraDeviceAvailable as? BooleanType{
-        
-            cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
-        }
-        else {
-            noCamera()
-        }
-      
         self.subscribeToKeyboardNotifications()
-        /*self.subscribeToHideKeyboardNotifications()*/
     }
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         self.unsubscribeFromKeyboardNotifications()
-        /*self.unsubscribeFromHidingKeyboardNotifications()*/
     }
 
     @IBAction func pickAnImage(sender: AnyObject) {
@@ -75,6 +70,10 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     
     @IBAction func pickedAnImageFromCamera(sender: AnyObject) {
         
+        if let cameraAvaialble = UIImagePickerController.isCameraDeviceAvailable as? BooleanType{
+         
+         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
+   
          let imagePickedFromCamera = UIImagePickerController()
          imagePickedFromCamera.delegate = self
          /*imagePickedFromCamera.allowsEditing = true*/
@@ -82,9 +81,40 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
          self.presentViewController(imagePickedFromCamera, animated: true, completion: nil)
          self.topTextField.hidden = false
          self.bottomTextField.hidden = false
+            
+        }
+            
+        else{
+            
+            noCamera()
+        }
+    }
+    
+    @IBAction func saveNewMeme(sender: AnyObject) {
+        
+        self.memedImage = generationOfMemedImage()
+        self.memeToSave = save()
+        /*let saveMemeController = self.storyboard!.instantiateViewControllerWithIdentifier("SavedMemeViewController") as! SavedMemeViewController
+        saveMemeController.meme = self.memeToSave
+        self.presentViewController(saveMemeController, animated: true, completion: nil)*/
         
     }
     
+    @IBAction func textFieldEditor(sender: AnyObject) {
+            
+            switch (sender.tag) {
+                
+            case 1:
+                self.topTextField.delegate = self
+    
+            case 2:
+                self.bottomTextField.delegate = self
+                
+            default:
+                
+                return
+            }
+    }
     
     // Method to initialize Meme UI TextField parameters for alignment, placeholder, and font style
     func initializeMemeEditableParameters(){
@@ -104,19 +134,14 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         self.bottomTextField.textAlignment = .Center
         self.bottomTextField.text = "Bottom"
         
-        /*self.topTextField.hidden = true
-        self.bottomTextField.hidden = true*/
-        
     }
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info:[NSObject : AnyObject]){
         
             if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-        
-                imagePickerView.contentMode = .ScaleAspectFit
                 self.imagePickerView.image = image
                 dismissViewControllerAnimated(true, completion: nil)
-            
+                self.enableSave = true
             }
         
     }
@@ -127,59 +152,27 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     
     }
     
-    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool{
+    func textFieldDidBeginEditing(textField: UITextField) {
         
-        if topTextField.isFirstResponder() || bottomTextField.isFirstResponder(){
-            
-            let newString = (textField.text as NSString).stringByReplacingCharactersInRange(range, withString: string)
-            
-            switch textField {
-            
-            case topTextField:
-                println("Top text field is now editable!")
-                /*Insert code for image croppping functionality to fit textField string in appropriate position based on image type, i.e. portrait or landscape */
-                
-            case bottomTextField:
-                
-                println("Bottom text field is now editable!")
-                /*Insert code for image croppping functionality to fit textField string in appropriate position based on image type, i.e. portrait or landscape */
-                
-            default:
-                
-                return false
-            }
+        if topTextField.text == "Top" || bottomTextField.text == "Bottom" {
+            textField.text = " "
+
         }
-        
-    return true
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {
         self.resignFirstResponder()
-        return true;
+        return true
     }
-    
-    func textFieldDidBeginEditing(textField: UITextField) {
-
-        if topTextField.text == "Top" || bottomTextField.text == "Bottom" {
-            textField.text = " "
-        }
-    }
-    
     
     func keyboardAnimatedShiftAppear(notification: NSNotification){
-        
-        if bottomTextField.isFirstResponder(){
-
-           self.view.frame.origin.y -= getKeyboardHeight(notification)
-        }
+    
+            self.view.frame.origin.y -= getKeyboardHeight(notification)
     }
     
     func keyboardAnimatedShiftDisappear(notification: NSNotification){
-        
-        if bottomTextField.isFirstResponder(){
-            
+    
             self.view.frame.origin.y += getKeyboardHeight(notification)
-        }
     
     }
     
@@ -190,29 +183,42 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         return keyboardSize.CGRectValue().height
     }
     
-    
     func subscribeToKeyboardNotifications(){
-    
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardAnimatedShiftAppear", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardAnimatedShiftAppear:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardAnimatedShiftDisappear:", name: UIKeyboardWillHideNotification, object: nil)
     
     }
     
     func unsubscribeFromKeyboardNotifications(){
     
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
-    
-    }
-
-    func subscribeToHideKeyboardNotifications(){
-        
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardAnimatedShiftDisappear", name: UIKeyboardWillHideNotification, object: nil)
-        
-    }
-    
-    func unsubscribeFromHidingKeyboardNotifications(){
         
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
+    }
+    
+    func generationOfMemedImage() -> UIImage {
+        //To Hide both the Bottom ToolBar and Top Navigation Bar
+        self.navigationController!.setNavigationBarHidden(true, animated: true)
+        self.photoToolbar.hidden = true
         
+        // Provides a view of image
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        self.view.drawViewHierarchyInRect(self.view.frame,
+            afterScreenUpdates: true)
+        let memedImage : UIImage =
+        UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // To Show both the Bottom ToolBar and Top Navigation Bar
+        self.navigationController!.setNavigationBarHidden(false, animated: true)
+        self.photoToolbar.hidden = false
+        
+        return memedImage
+    }
+    
+    func save() -> GenMeme{
+        let meme =  GenMeme(textHeader: topTextField.text, textFootNote: bottomTextField.text, pickedImage: self.imagePickerView.image, memedImage: self.memedImage)
+        return meme
     }
     
     func noCamera(){
@@ -221,7 +227,6 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         alertVC.addAction(okAction)
         presentViewController(alertVC, animated: true, completion: nil)
         }
-    
     
 }
 
