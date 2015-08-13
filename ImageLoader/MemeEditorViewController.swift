@@ -15,8 +15,7 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     @IBOutlet weak var topTextField: UITextField!
     @IBOutlet weak var bottomTextField: UITextField!
     @IBOutlet weak var photoToolbar: UIToolbar!
-    @IBOutlet weak var saveButton: UIBarButtonItem!
-    @IBOutlet weak var navigationBar: UINavigationItem!
+    @IBOutlet weak var cancelButton: UIBarButtonItem!
     @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var pickPhotoFromLibrary: UIBarButtonItem!
     
@@ -41,11 +40,6 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         
         initializeMemeEditableParameters()
         
-        //(DO NOT ERASE!!!!!!!) Will require later when saving memes after text editing
-        /*let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        memes = applicationDelegate.memes
-        tableView.reloadData() (DO NOT ERASE!!!!!!!)*/
-        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -62,7 +56,6 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
-        /*pickerController.allowsEditing = true*/
         pickerController.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
         self.presentViewController(pickerController, animated: true, completion: nil)
         
@@ -76,11 +69,8 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
    
          let imagePickedFromCamera = UIImagePickerController()
          imagePickedFromCamera.delegate = self
-         /*imagePickedFromCamera.allowsEditing = true*/
          imagePickedFromCamera.sourceType = UIImagePickerControllerSourceType.Camera
          self.presentViewController(imagePickedFromCamera, animated: true, completion: nil)
-         /*self.topTextField.hidden = false
-         self.bottomTextField.hidden = false*/
             
         }
             
@@ -91,16 +81,14 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         }
     }
     
-    @IBAction func saveNewMeme(sender: AnyObject) {
+    @IBAction func cancelMeme(sender: AnyObject) {
         
-        self.memedImage = generationOfMemedImage()
-        self.memeToSave = save()
-        /*let saveMemeController = self.storyboard!.instantiateViewControllerWithIdentifier("SavedMemeViewController") as! SavedMemeViewController
-        saveMemeController.meme = self.memeToSave
-        self.presentViewController(saveMemeController, animated: true, completion: nil)*/
+        self.topTextField.text = "Top"
+        self.bottomTextField.text = "Bottom"
+        self.dismissViewControllerAnimated(true, completion: nil)
         
     }
-    
+
     @IBAction func textFieldEditor(sender: AnyObject) {
             
             switch (sender.tag) {
@@ -119,8 +107,16 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     
     @IBAction func memeSharing(sender: AnyObject) {
         
-            self.enableSave = true
-
+        self.enableSave = true
+        
+        /* Declaration of an Activity View Controller, (a view controller that allows for you to SMS, Email, Facebook, Twitter, etc functionality)*/
+        let toShareAMeme = generationOfMemedImage()
+        let activityViewController : UIActivityViewController = UIActivityViewController(activityItems: [toShareAMeme], applicationActivities: nil)
+        self.presentViewController(activityViewController, animated: true, completion: nil)
+        
+        // To Save images after sharing
+        /*self.memedImage = generationOfMemedImage()
+        self.memeToSave = save()*/
         
     }
     
@@ -136,18 +132,16 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         self.topTextField.defaultTextAttributes = memeTextAttributes
         self.bottomTextField.defaultTextAttributes = memeTextAttributes
         
-        /*self.topTextField.delegate = self
-        self.bottomTextField.delegate = self*/
-        
         self.topTextField.textAlignment = .Center
         self.topTextField.text = "Top"
         self.bottomTextField.textAlignment = .Center
         self.bottomTextField.text = "Bottom"
         
+        //Disable of both the Share (Activity View Controller) and Save buttons
         self.shareButton.enabled = false
-        self.saveButton.enabled = false
         
     }
+    
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info:[NSObject : AnyObject]){
         
@@ -169,20 +163,21 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     
     }
     
-    func textFieldDidBeginEditing(textField: UITextField) {
+    func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
         
         if topTextField.text == "Top" || bottomTextField.text == "Bottom" {
             
             textField.text = " "
-
+            
         }
+        return true
     }
     
     func textFieldDidEndEditing(textField: UITextField){
     
         if (topTextField.text != "Top" && bottomTextField.text != "Bottom") && (topTextField.text != " " && bottomTextField != " ") {
             
-            self.saveButton.enabled = true
+            
             self.shareButton.enabled = true
             
         }
@@ -195,12 +190,16 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     }
     
     func keyboardAnimatedShiftAppear(notification: NSNotification){
-    
+        
+            self.navigationController!.setNavigationBarHidden(true, animated: true)
+            self.photoToolbar.hidden = true
             self.view.frame.origin.y -= getKeyboardHeight(notification)
     }
     
     func keyboardAnimatedShiftDisappear(notification: NSNotification){
-    
+        
+            self.navigationController!.setNavigationBarHidden(false, animated: true)
+            self.photoToolbar.hidden = false
             self.view.frame.origin.y += getKeyboardHeight(notification)
     
     }
@@ -247,6 +246,8 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     
     func save() -> GenMeme{
         let meme =  GenMeme(textHeader: topTextField.text, textFootNote: bottomTextField.text, pickedImage: self.imagePickerView.image, memedImage: self.memedImage)
+        
+        self.dismissViewControllerAnimated(true, completion: nil)
         return meme
     }
     
