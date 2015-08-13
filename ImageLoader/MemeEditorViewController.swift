@@ -17,10 +17,12 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     @IBOutlet weak var photoToolbar: UIToolbar!
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var navigationBar: UINavigationItem!
+    @IBOutlet weak var shareButton: UIBarButtonItem!
+    @IBOutlet weak var pickPhotoFromLibrary: UIBarButtonItem!
     
     // object variable declaration to initiate save capability
     var enableSave = false
-    
+    /*var dateStamp = NSDate()*/
     var memeToSave : GenMeme! // Meme struct object variable declaration
     var memedImage :  UIImage! // Meme image object variable declaration
     
@@ -28,7 +30,7 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     let memeTextAttributes = [
         NSStrokeColorAttributeName : UIColor.blackColor(),
         NSForegroundColorAttributeName : UIColor.whiteColor(),
-        NSFontAttributeName : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+        NSFontAttributeName : UIFont(name: "HelveticaNeue-CondensedBlack", size: 60)!,
         NSStrokeWidthAttributeName : NSNumber(float: -3.0)]
     
 
@@ -63,8 +65,6 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         /*pickerController.allowsEditing = true*/
         pickerController.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
         self.presentViewController(pickerController, animated: true, completion: nil)
-        self.topTextField.hidden = false
-        self.bottomTextField.hidden = false
         
     }
     
@@ -79,14 +79,15 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
          /*imagePickedFromCamera.allowsEditing = true*/
          imagePickedFromCamera.sourceType = UIImagePickerControllerSourceType.Camera
          self.presentViewController(imagePickedFromCamera, animated: true, completion: nil)
-         self.topTextField.hidden = false
-         self.bottomTextField.hidden = false
+         /*self.topTextField.hidden = false
+         self.bottomTextField.hidden = false*/
             
         }
             
         else{
             
             noCamera()
+            
         }
     }
     
@@ -116,6 +117,15 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
             }
     }
     
+    @IBAction func memeSharing(sender: AnyObject) {
+        
+            self.enableSave = true
+
+        
+    }
+    
+    // Begin of local methods declarations
+    
     // Method to initialize Meme UI TextField parameters for alignment, placeholder, and font style
     func initializeMemeEditableParameters(){
         
@@ -126,22 +136,29 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
         self.topTextField.defaultTextAttributes = memeTextAttributes
         self.bottomTextField.defaultTextAttributes = memeTextAttributes
         
-        self.topTextField.delegate = self
-        self.bottomTextField.delegate = self
+        /*self.topTextField.delegate = self
+        self.bottomTextField.delegate = self*/
         
         self.topTextField.textAlignment = .Center
         self.topTextField.text = "Top"
         self.bottomTextField.textAlignment = .Center
         self.bottomTextField.text = "Bottom"
         
+        self.shareButton.enabled = false
+        self.saveButton.enabled = false
+        
     }
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info:[NSObject : AnyObject]){
         
             if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+                
                 self.imagePickerView.image = image
                 dismissViewControllerAnimated(true, completion: nil)
-                self.enableSave = true
+                
+                self.topTextField.hidden = false
+                self.bottomTextField.hidden = false
+                
             }
         
     }
@@ -155,9 +172,21 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
     func textFieldDidBeginEditing(textField: UITextField) {
         
         if topTextField.text == "Top" || bottomTextField.text == "Bottom" {
+            
             textField.text = " "
 
         }
+    }
+    
+    func textFieldDidEndEditing(textField: UITextField){
+    
+        if (topTextField.text != "Top" && bottomTextField.text != "Bottom") && (topTextField.text != " " && bottomTextField != " ") {
+            
+            self.saveButton.enabled = true
+            self.shareButton.enabled = true
+            
+        }
+        return
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {

@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="QJE-fA-TIi">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
@@ -107,9 +108,7 @@
                                 <exclude reference="bPg-Tj-bfX"/>
                             </mask>
                             <mask key="constraints">
-                                <exclude reference="5mp-EW-YS5"/>
-                                <exclude reference="6bQ-An-aG6"/>
-                                <exclude reference="U1f-LK-3Lu"/>
+                                <exclude reference="E3Q-kx-Noh"/>
                                 <exclude reference="9z3-qR-Mxo"/>
                                 <exclude reference="ORr-xJ-PEy"/>
                                 <exclude reference="qk5-PU-pWU"/>
@@ -120,7 +119,9 @@
                                 <exclude reference="Edp-uZ-0UC"/>
                                 <exclude reference="ddS-IT-Ozc"/>
                                 <exclude reference="h5g-nu-l7m"/>
-                                <exclude reference="E3Q-kx-Noh"/>
+                                <exclude reference="5mp-EW-YS5"/>
+                                <exclude reference="6bQ-An-aG6"/>
+                                <exclude reference="U1f-LK-3Lu"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
@@ -131,9 +132,7 @@
                                 <include reference="bPg-Tj-bfX"/>
                             </mask>
                             <mask key="constraints">
-                                <include reference="5mp-EW-YS5"/>
-                                <include reference="6bQ-An-aG6"/>
-                                <include reference="U1f-LK-3Lu"/>
+                                <include reference="E3Q-kx-Noh"/>
                                 <include reference="9z3-qR-Mxo"/>
                                 <include reference="ORr-xJ-PEy"/>
                                 <include reference="qk5-PU-pWU"/>
@@ -144,11 +143,18 @@
                                 <include reference="Edp-uZ-0UC"/>
                                 <include reference="ddS-IT-Ozc"/>
                                 <include reference="h5g-nu-l7m"/>
-                                <include reference="E3Q-kx-Noh"/>
+                                <include reference="5mp-EW-YS5"/>
+                                <include reference="6bQ-An-aG6"/>
+                                <include reference="U1f-LK-3Lu"/>
                             </mask>
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Meme Editor" id="bkR-Ku-Vgq">
+                        <barButtonItem key="leftBarButtonItem" systemItem="action" id="xUd-r0-9gv">
+                            <connections>
+                                <action selector="memeSharing:" destination="vXZ-lx-hvc" id="kU3-zG-7mk"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="save" id="dFC-M1-gwu">
                             <connections>
                                 <action selector="saveNewMeme:" destination="vXZ-lx-hvc" id="4g1-4L-vVd"/>
@@ -161,7 +167,9 @@
                         <outlet property="imagePickerView" destination="JcE-WZ-liP" id="FHA-m3-Fqm"/>
                         <outlet property="navigationBar" destination="bkR-Ku-Vgq" id="sVj-rb-zaJ"/>
                         <outlet property="photoToolbar" destination="RVW-CE-cRi" id="70K-Gg-0Ym"/>
+                        <outlet property="pickPhotoFromLibrary" destination="0Zw-xx-aCj" id="TCT-0H-caq"/>
                         <outlet property="saveButton" destination="dFC-M1-gwu" id="l3W-K6-C0C"/>
+                        <outlet property="shareButton" destination="xUd-r0-9gv" id="5uF-3f-CyE"/>
                         <outlet property="topTextField" destination="MeP-Bz-aZ7" id="83M-9z-a3L"/>
                     </connections>
                 </viewController>
